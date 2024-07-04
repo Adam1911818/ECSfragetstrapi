@@ -4,7 +4,7 @@ provider "aws" {
 
 
 resource "aws_ecs_cluster" "strapi_cluster" {
-  name = "strapi-cluster"
+  name = "main"
 }
 
 resource "aws_ecs_task_definition" "strapi_task_definition" {
@@ -19,7 +19,7 @@ resource "aws_ecs_task_definition" "strapi_task_definition" {
 
   container_definitions = jsonencode([
     {
-      name      = "strapi-container"
+      name      = "adamstrapi"
       image     = "533266978173.dkr.ecr.ap-south-1.amazonaws.com/adamstrapi"
       cpu       = 256
       memory    = 512
@@ -34,9 +34,9 @@ resource "aws_ecs_task_definition" "strapi_task_definition" {
   ])
 }
 
-resource "aws_ecs_service" "strapi_service1" {
+resource "aws_ecs_service" "strapi_service" {
   name            = "strapi-service-app"
-  cluster         = aws_ecs_cluster.strapi_cluster.id
+  cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.strapi_task_definition.arn
   desired_count   = 1
   launch_type     = "FARGATE"
@@ -47,7 +47,7 @@ resource "aws_ecs_service" "strapi_service1" {
     assign_public_ip = true
   }
 }
-resource "aws_eip" "strapi_service1_ip" { }
+resource "aws_eip" "strapi_service_ip" { }
 
 
 # Route 53 DNS record for sub-domain
@@ -56,5 +56,5 @@ resource "aws_route53_record" "strapi_subdomain" {
   name    = "adamstrapi.contentecho.in"
   type    = "A"
   ttl = "300"
-  records = [aws_eip.strapi_service1_ip.public_ip]   
+  records = [aws_eip.strapi_service_ip.public_ip]   
 }
